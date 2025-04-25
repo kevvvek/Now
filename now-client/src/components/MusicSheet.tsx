@@ -7,11 +7,13 @@ const MusicSheet: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [jobId, setJobId] = useState<string | null>(null);
     const [generationStatus, setGenerationStatus] = useState<any>(null);
+    const [audioTestInfo, setAudioTestInfo] = useState<any>(null);
 
     const handleGenerate = async () => {
         try {
             setIsLoading(true);
             setError(null);
+            setAudioTestInfo(null);
             
             const response = await fetch('http://localhost:5257/api/PianoSheetGenerator/generate', {
                 method: 'POST',
@@ -46,6 +48,16 @@ const MusicSheet: React.FC = () => {
 
             const status = await response.json();
             setGenerationStatus(status);
+
+            if (status.state === 'Completed') {
+                // Get test information about the audio file
+                const filename = jobId.split('\\').pop(); // Get filename from path
+                const testResponse = await fetch(`http://localhost:5257/api/PianoSheetGenerator/test/${filename}`);
+                if (testResponse.ok) {
+                    const testInfo = await testResponse.json();
+                    setAudioTestInfo(testInfo);
+                }
+            }
 
             if (status.state !== 'Completed' && status.state !== 'Failed') {
                 // Continue polling every 2 seconds
@@ -91,17 +103,28 @@ const MusicSheet: React.FC = () => {
 
                 {generationStatus && (
                     <Alert variant="info" className="mt-3">
-                        Status: {generationStatus.state}
+                        <div>Status: {generationStatus.state}</div>
                         {generationStatus.progress > 0 && (
                             <div>Progress: {generationStatus.progress}%</div>
                         )}
                         {generationStatus.resultUrl && (
-                            <div>
-                                <a href={generationStatus.resultUrl} target="_blank" rel="noopener noreferrer">
-                                    Download Sheet Music
-                                </a>
+                            <div className="mt-3">
+                                <h5>Audio Preview:</h5>
+                                <audio controls className="w-100 mt-2">
+                                    <source src={`http://localhost:5257${generationStatus.resultUrl}`} type="audio/mp4" />
+                                    Your browser does not support the audio element.
+                                </audio>
                             </div>
                         )}
+                    </Alert>
+                )}
+
+                {audioTestInfo && (
+                    <Alert variant="success" className="mt-3">
+                        <h5>Audio File Information:</h5>
+                        <pre style={{ whiteSpace: 'pre-wrap' }}>
+                            {JSON.stringify(audioTestInfo, null, 2)}
+                        </pre>
                     </Alert>
                 )}
             </Card.Body>

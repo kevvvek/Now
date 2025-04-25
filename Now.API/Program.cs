@@ -1,3 +1,5 @@
+using Now.API.Services.PianoSheetGenerator;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add CORS configuration

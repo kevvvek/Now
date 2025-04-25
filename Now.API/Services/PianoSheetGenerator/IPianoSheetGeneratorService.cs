@@ -21,7 +21,7 @@ namespace Now.API.Services.PianoSheetGenerator
 
     public class GenerationStatus
     {
-        public string JobId { get; set; }
+        public string? JobId { get; set; }
         public GenerationState State { get; set; }
         public int Progress { get; set; }
         public string? ErrorMessage { get; set; }
