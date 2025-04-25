@@ -1,34 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Nav, Navbar, Row, Col, Card, Alert } from 'react-bootstrap';
+import { Container, Nav, Navbar, Tab, Tabs } from 'react-bootstrap';
 import './App.css';
+import MusicSheet from './components/MusicSheet';
 
 function App() {
-  const [message, setMessage] = useState<string>('');
-  const [error, setError] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    console.log('Fetching message from backend...');
-    fetch('http://localhost:5257/api/helloworld')
-      .then(response => {
-        console.log('Response received:', response);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        console.log('Data received:', data);
-        setMessage(data.message);
-      })
-      .catch(err => {
-        console.error('Error fetching message:', err);
-        setError('Failed to fetch message from server: ' + err.message);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, []);
+  const [activeTab, setActiveTab] = useState('home');
 
   return (
     <div className="App">
@@ -47,34 +23,20 @@ function App() {
       </Navbar>
 
       <Container className="mt-4">
-        <Row>
-          <Col md={8}>
-            <Card>
-              <Card.Body>
-                <Card.Title>Welcome to Now Project</Card.Title>
-                {isLoading && <Alert variant="info">Loading message from backend...</Alert>}
-                {error && <Alert variant="danger">{error}</Alert>}
-                {message && <Alert variant="success">{message}</Alert>}
-                <Card.Text>
-                  This is a full-stack application built with React and ASP.NET Core.
-                  The frontend is styled with Bootstrap for a responsive and modern UI.
-                </Card.Text>
-              </Card.Body>
-            </Card>
-          </Col>
-          <Col md={4}>
-            <Card>
-              <Card.Body>
-                <Card.Title>Quick Links</Card.Title>
-                <Nav className="flex-column">
-                  <Nav.Link href="#dashboard">Dashboard</Nav.Link>
-                  <Nav.Link href="#profile">Profile</Nav.Link>
-                  <Nav.Link href="#settings">Settings</Nav.Link>
-                </Nav>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
+        <Tabs
+          activeKey={activeTab}
+          onSelect={(k) => setActiveTab(k || 'home')}
+          className="mb-3"
+        >
+          <Tab eventKey="home" title="Home">
+            <h2>Welcome to Now Project</h2>
+            <p>Select a module from the tabs above to get started.</p>
+          </Tab>
+          <Tab eventKey="musicsheet" title="Music Sheet Generator">
+            <MusicSheet />
+          </Tab>
+          {/* Add more module tabs here */}
+        </Tabs>
       </Container>
     </div>
   );
